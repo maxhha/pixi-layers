@@ -2,6 +2,8 @@
 ```c
 include "bin/core.pixi"
 ```
+Core functions.
+
 ### set_standart_uis_properties
 Make from container an ui object.
 ```c
@@ -39,7 +41,7 @@ void; It fills $cont properties:
     *   states.size - count elements in container
 *   state_id = current state id
 
-**Exapmles:** *TODO: add examples*
+**Examples:** *TODO: add examples*
 ```c
 ```
 
@@ -63,7 +65,7 @@ It calls
 EVT_MOUSE\* events have `$scancode_id = 0`;<br>
 EVT_TOUCH\* events have `$scancode_id = EVT[EVT_SCANCODE]`
 
-**Exapmles:**
+**Examples:**
 ```c
 /* usual usage */
 // ui - an ui object
@@ -119,6 +121,7 @@ while(1){ // main loop
 include "bin/core.pixi"
 include "bin/layers.pixi"
 ```
+Layers manage multiple ui object as one.
 
 ### create_abstract_layer
 Create an array of ui objects.
@@ -137,7 +140,7 @@ of size `($number_of_elements)` filled with `-1` and had setted properties:
     *   <= 0 - dont draw its elements
     *   \> 0 - draw its elements in straight order skipping `-1`
 
-**Exapmles:**
+**Examples:**
 ```c
 
 UI = create_abstract_layer(N)
@@ -180,6 +183,7 @@ while(1){ // main loop
 include "bin/core.pixi"
 include "bin/release_buttons.pixi"
 ```
+Simple button often used in UI.
 
 ### create_button_activated_by_release
 Description
@@ -216,7 +220,7 @@ Also, `$button` have filled next properties:
 *   on_click = $on_click
 *   show = 1 - should be used by $draw_func
 
-**Exapmles:** *TODO: add example*
+**Examples:** *TODO: add example*
 ```
 ```
 
@@ -242,7 +246,7 @@ $button = create_button_activated_by_release_with_text(
 $button - [button](#create_button_activated_by_release) with added properties:
 *   text = $text; changeable - text that will be drawing in center of button;
 
-**Exapmles:**
+**Examples:**
 ```c
 counter = 0
 button = create_button_activated_by_release_with_text(
@@ -297,7 +301,7 @@ example_function(
 **Result:**
 void;
 
-**Exapmles:**
+**Examples:**
 ```c
 fn f(a, b) {
     logf("%d/n", a + b)
