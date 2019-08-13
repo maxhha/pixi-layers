@@ -1,0 +1,163 @@
+fn create_abstract_layer($number_buttons) {
+	$layer = new($number_buttons, 1, INT)
+	clean($layer, -1)
+
+	set_standart_uis_properties($layer,
+		_press_mouse_on_abstract_layer,
+		_move_mouse_on_abstract_layer,
+		_release_mouse_on_abstract_layer,
+		_save_state_of_abstract_layer,
+		_set_state_in_abstract_layer,
+		_draw_buttons_layer,
+		_remove_buttons_layer)
+
+	$layer.show = 1
+
+	ret($layer)
+}
+
+fn _press_mouse_on_abstract_layer($layer, $scancode, $x, $y) {
+	ret(_mouse_event_propagation_of_layers($layer, "press", $scancode, $x, $y))
+}
+
+fn _move_mouse_on_abstract_layer($layer, $scancode, $x, $y) {
+	ret(_mouse_event_propagation_of_layers($layer, "move", $scancode, $x, $y))
+}
+
+fn _release_mouse_on_abstract_layer($layer, $scancode, $x, $y) {
+	ret(_mouse_event_propagation_of_layers($layer, "release", $scancode, $x, $y))
+}
+
+fn _mouse_event_propagation_of_layers($layer, $evt_name, $scancode, $x, $y) {
+	if $layer.grab_mouse < 0 { ret(0) }
+
+	if $layer.grab_mouse > 0 {
+		$r = _propagation_event_to_layer_mouse_grabber($layer, $evt_name, $scancode, $x, $y)
+		if $r != -1 {
+			ret($r)
+		}
+	}
+
+	$i = get_size($layer) - 1
+	while($i >= 0) {
+		$object = $layer[$i]
+
+		if $object != -1 {
+			if get_prop($object, $evt_name)($object, $scancode, $x, $y) > 0{
+				if $scancode >= get_size($layer.touches) {
+					resize_ui_object_touches($layer, $scancode)
+				}
+				$layer.grab_mouse + 1
+				$layer.touches[$scancode] = $i
+				ret(1)
+			}
+		}
+		$i - 1
+	}
+	ret(0)
+}
+
+fn _propagation_event_to_layer_mouse_grabber($layer, $evt_name, $scancode, $x, $y) {
+	if $scancode < get_size($layer.touches) && $layer.touches[$scancode] != -1{
+		$object = $layer[$layer.touches[$scancode]]
+		if $object != -1 {
+			if get_prop($object, $evt_name)($object, $scancode, $x, $y) < 1 {
+				$layer.touches[$scancode] = -1
+				$layer.grab_mouse - 1
+				ret(0)
+			}
+			ret(1)
+		}
+		else {
+			$layer.touches[$scancode] = -1
+			$layer.grab_mouse - 1
+		}
+	}
+	ret(-1)
+}
+
+fn _save_state_of_abstract_layer($layer) {
+	$state = _create_layer_state($layer)
+	$state.show = $layer.show
+	ret(push_ui_object_state($layer, $state))
+}
+
+fn _create_layer_state($layer) {
+	$state = new(get_size($layer), 1, INT8)
+	$i = 0
+	while($i < get_size($layer)) {
+		$object = $layer[$i]
+		if $object != -1 {
+			if $object.state_id == -1 {
+				$state[$i] = $object.save_state($object)
+			}
+			else {
+				$state[$i] = $object.state_id
+			}
+		}
+		else {
+			$state[$i] = -1
+		}
+		$i + 1
+	}
+	$state.grab_mouse = ($layer.grab_mouse < 0) * $layer.grab_mouse
+
+	ret($state)
+}
+
+fn _set_state_in_abstract_layer($layer, $state_id) {
+	if $state_id < 0 || $state_id >= $layer.states.size {
+		ret
+	}
+	$state = $layer.states[$state_id]
+	$layer.state_id = $state_id
+	$layer.show = $state.show
+	_set_state_to_layers_elements($layer, $state)
+}
+
+fn _set_state_to_layers_elements($layer, $state) {
+	clean($layer.touches, -1)
+	$layer.grab_mouse = $state.grab_mouse
+	$i = 0
+	while($i < get_size($layer)) {
+		$object = $layer[$i]
+		if $object != -1 {
+			$object.set_state($object, $state[$i])
+		}
+		$i + 1
+	}
+}
+
+fn _draw_buttons_layer($layer) {
+	if $layer.show <= 0 { ret }
+	$i = 0
+	while($i < get_size($layer)) {
+		$object = $layer[$i]
+		if $object != -1 {
+			$object.draw($object)
+		}
+		$i + 1
+	}
+}
+
+fn _remove_buttons_layer($layer) {
+	$i = 0
+	while($i < get_size($layer)) {
+		$object = $layer[$i]
+		if $object != -1 {
+			$object.remove($object)
+		}
+		$i + 1
+	}
+	$i = 0
+	while($i < $layer.states.size) {
+		remove_props($layer.states[$i])
+		remove($layer.states[$i])
+		$i + 1
+	}
+	remove_props($layer.states)
+	remove($layer.states)
+	remove($layer.touches)
+	remove_props($layer)
+	remove($layer)
+}

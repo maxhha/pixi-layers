@@ -35,3 +35,20 @@ fn set_standart_uis_properties($cont, $press, $move, $release, $save_state, $set
 	$cont.draw = $draw
 	$cont.remove = $remove
 }
+
+fn resize_ui_object_touches($ui_object, $max_scancode) {
+	$t = new($max_scancode + 1, 1, INT8)
+	clean($t, -1)
+	op_cc(OP_COPY, $t, $ui_object.touches, 0,0,get_size($ui_object.touches))
+	remove($ui_object.touches)
+	$ui_object.touches = $t
+}
+
+fn push_ui_object_state($ui_object, $state) {
+	resize($ui_object.states, $ui_object.states.size + 1)
+	$state_id = $ui_object.states.size
+	$ui_object.states.size + 1
+	$ui_object.states[$state_id] = $state
+	$ui_object.state_id = $state_id
+	ret($state_id)
+}

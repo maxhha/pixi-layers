@@ -1,0 +1,150 @@
+BUTTON_BGCOLOR = #1F1F0E
+BUTTON_PRESSED_BGCOLOR = #FFFB75
+BUTTON_FONT_SCALE = 2
+
+fn create_button_activated_by_release($x, $y, $width, $height, $on_click, $save_state_func, $set_state_func, $draw_func, $remove_func) {
+	$button = new(1, 1, INT8)
+	$button[0] = 0
+
+	set_standart_uis_properties($button,
+		_press_mouse_on_button_act_by_r,
+		_move_mouse_on_button_act_by_r,
+		_release_mouse_on_button_act_by_r,
+		$save_state_func,
+		$set_state_func,
+		$draw_func,
+		$remove_func)
+
+	$button.x = $x
+	$button.y = $y
+	$button.width = $width
+	$button.height = $height
+	$button.on_click = $on_click
+	$button.show = 1
+
+	ret($button)
+}
+
+fn _create_buttons_state($button) {
+	$state = clone($button)
+	$state.x = $button.x
+	$state.y = $button.y
+	$state.width = $button.width
+	$state.height = $button.height
+	$state.show = $button.show
+	$state.grab_mouse = ($button.grab_mouse < 0) * $button.grab_mouse
+	ret($state)
+}
+
+fn _set_buttons_props_from_state($button, $state) {
+	$button[0] = 0
+	$button.grab_mouse = $state.grab_mouse
+	$button.x = $state.x
+	$button.y = $state.y
+	$button.width = $state.width
+	$button.height = $state.height
+	$button.show = $state.show
+	clean($button.touches, -1)
+}
+
+fn _press_mouse_on_button_act_by_r ($button, $scancode, $x, $y) {
+	if $button.grab_mouse < 0 || abs($x - $button.x) > $button.width / 2 || abs($y - $button.y) > $button.height / 2 { ret(0) }
+
+	if $scancode >= get_size($button.touches) {
+		resize_ui_object_touches($button, $scancode)
+	}
+
+	if $button.touches[$scancode] == -1 {
+		$button.touches[$scancode] = 1
+		$button.grab_mouse + 1
+		$button[0] + 1
+	}
+	ret(1)
+}
+
+fn _move_mouse_on_button_act_by_r ($button, $scancode, $x, $y) {
+	if $scancode >= get_size($button.touches) || $button.touches[$scancode] == -1{ ret(0) }
+	if abs($x - $button.x) > $button.width / 2 || abs($y - $button.y) > $button.height / 2 {
+		if $button.touches[$scancode] == 1 {
+			$button[0] - 1
+			$button.touches[$scancode] = 0
+		}
+	}
+	else {
+		if $button.touches[$scancode] == 0 {
+			$button[0] + 1
+			$button.touches[$scancode] = 1
+		}
+	}
+	ret(1)
+}
+
+fn _release_mouse_on_button_act_by_r ($button, $scancode, $x, $y) {
+	if $scancode >= get_size($button.touches) || $button.touches[$scancode] == -1{ ret(0) }
+	$button.grab_mouse - 1
+	$button[0] - $button.touches[$scancode]
+	$button.touches[$scancode] = -1
+	if $button.grab_mouse == 0 && abs($x - $button.x) <= $button.width / 2 && abs($y - $button.y) <= $button.height / 2 {
+		$button.on_click();
+	}
+	ret(0)
+}
+
+
+
+fn create_button_activated_by_release_with_text($x, $y, $width, $height, $on_click, $text) {
+
+	$button = create_button_activated_by_release($x, $y, $width, $height, $on_click,
+		_save_state_of_text_button, _set_state_in_text_button,
+		_draw_text_button, _remove_text_button_act_by_r)
+
+	$button.text = $text
+	ret($button)
+}
+
+fn _save_state_of_text_button($button) {
+	$state = _create_buttons_state($button)
+	$state.text = $button.text
+	ret(push_ui_object_state($button, $state))
+}
+
+fn _set_state_in_text_button($button, $state_id) {
+	if $state_id < 0 || $state_id >= $button.states.size {
+		ret
+	}
+	$state = $button.states[$state_id]
+	$button.text = $state.text
+	$button.state_id = $state_id
+	_set_buttons_props_from_state($button, $state)
+}
+
+fn _draw_text_button($button) {
+	if $button.show <= 0 { ret }
+	if $button[0] > 0 {
+		$color = BUTTON_PRESSED_BGCOLOR
+	}
+	else {
+		$color = BUTTON_BGCOLOR
+	}
+	fbox($button.x - $button.width / 2, $button.y - $button.height / 2, $button.width, $button.height, $color)
+	box($button.x - $button.width / 2, $button.y - $button.height / 2, $button.width - 1, $button.height - 1, #ffffff)
+	t_push_matrix()
+	t_translate($button.x, $button.y, 0)
+	t_scale(UI_FONT_SCALE * BUTTON_FONT_SCALE, UI_FONT_SCALE * BUTTON_FONT_SCALE, 1)
+	print($button.text)
+	t_pop_matrix()
+}
+
+fn _remove_text_button_act_by_r($button) {
+	$i = 0
+	while($i < $button.states.size) {
+		remove_props($button.states[$i])
+		remove($button.states[$i])
+		$i + 1
+	}
+	remove_props($button.states)
+	remove($button.states)
+	remove($button.touches)
+	remove_props($button)
+	remove($button)
+}
