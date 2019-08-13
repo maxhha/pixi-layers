@@ -1,3 +1,15 @@
+## Content
+*   [Core](#Core)
+    *   [set_standart_uis_properties](#set_standart_uis_properties)
+    *   [check_mouse_and_touches_events](#check_mouse_and_touches_events)
+    *   [resize_ui_object_touches](#resize_ui_object_touches)
+    *   [push_ui_object_state](#push_ui_object_state)
+*   [Layers](#Layers)
+    *   [create_abstract_layer](#create_abstract_layer)
+*   [Release buttons](#Release-buttons)
+    *   [create_button_activated_by_release](#create_button_activated_by_release)
+    *   [create_button_activated_by_release_with_text](#create_button_activated_by_release_with_text)
+
 ## Core
 ```c
 include "bin/core.pixi"
