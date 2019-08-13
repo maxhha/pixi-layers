@@ -1,0 +1,39 @@
+include "bin/core.pixi"
+include "bin/release_buttons.pixi"
+
+counter = 0
+button = create_button_activated_by_release_with_text(
+    0, 40,
+    256, 80, // place button in the center of screen
+    {
+        counter + 1
+    }, // on click add to counter 1
+    "Add 1" // button label
+)
+
+fn gl_callback($u){
+    set_screen(GL_SCREEN)
+    clear()
+    // draw button
+    button.draw(button)
+    $ts = "" // create temporary string
+    sprintf($ts, "%d", counter) // write value to string
+    t_push_matrix()
+    t_translate(0, -40, 0)
+    t_scale(2,2,1)
+    print($ts) // print string on screen
+    t_pop_matrix()
+    set_screen(0)
+}
+
+set_gl_callback(gl_callback, 0)
+
+while(1) { // main loop
+    while(get_event()) { // event loop
+        if EVT[EVT_TYPE] == EVT_QUIT {
+            halt
+        }
+        check_mouse_and_touches_events(button)
+    }
+    frame()
+}
