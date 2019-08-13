@@ -1,6 +1,6 @@
-### Functions
+## Functions
 
-##### set_standart_uis_properties
+### set_standart_uis_properties
 Make from container an ui object.
 ```
 set_standart_uis_properties(
@@ -42,7 +42,7 @@ void; It fills $cont properties:
 
 -----------
 
-##### check_mouse_and_touches_events
+### check_mouse_and_touches_events
 Check EVT for mouse and touches events and pass it to ui object.
 ```
 check_mouse_and_touches_events( $ui_object )
@@ -61,7 +61,7 @@ EVT_TOUCH\* events have `$scancode_id = EVT[EVT_SCANCODE]`
 
 -----------
 
-##### example_function
+### example_function
 Description
 ```
 example_function(
