@@ -1,0 +1,37 @@
+fn check_mouse_and_touches_events($ui_object) {
+	if EVT[EVT_TYPE] == EVT_MOUSEBUTTONDOWN {
+		ret($ui_object.press($ui_object, 0, EVT[EVT_X], EVT[EVT_Y]))
+	}
+	if EVT[EVT_TYPE] == EVT_TOUCHBEGIN {
+		ret($ui_object.press($ui_object, EVT[EVT_SCANCODE], EVT[EVT_X], EVT[EVT_Y]))
+	}
+	if EVT[EVT_TYPE] == EVT_MOUSEMOVE {
+		ret($ui_object.move($ui_object, 0, EVT[EVT_X], EVT[EVT_Y]))
+	}
+	if EVT[EVT_TYPE] == EVT_TOUCHMOVE {
+		ret($ui_object.move($ui_object, EVT[EVT_SCANCODE], EVT[EVT_X], EVT[EVT_Y]))
+	}
+	if EVT[EVT_TYPE] == EVT_MOUSEBUTTONUP {
+		ret($ui_object.release($ui_object, 0, EVT[EVT_X], EVT[EVT_Y]))
+	}
+	if EVT[EVT_TYPE] == EVT_TOUCHEND {
+		ret($ui_object.release($ui_object, EVT[EVT_SCANCODE], EVT[EVT_X], EVT[EVT_Y]))
+	}
+	ret(0)
+}
+
+fn set_standart_uis_properties($cont, $press, $move, $release, $save_state, $set_state, $draw, $remove) {
+	$cont.grab_mouse = 0
+	$cont.touches = new(2,1,INT8)
+	clean($cont.touches, -1)
+	$cont.states = new(1,1, INT)
+	$cont.states.size = 0
+	$cont.state_id = -1
+	$cont.press = $press
+	$cont.move = $move
+	$cont.release = $release
+	$cont.save_state = $save_state
+	$cont.set_state = $set_state
+	$cont.draw = $draw
+	$cont.remove = $remove
+}
